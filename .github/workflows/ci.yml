@@ -1,0 +1,54 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: shellcheck
+        run: shellcheck scripts/*.sh lib/*.sh tests/shims/mysql
+
+  bats:
+    runs-on: ubuntu-latest
+    needs: shellcheck
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: ci-solo-para-pruebas
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pci-solo-para-pruebas --silent"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    env:
+      MYSQL_TEST_HOST: 127.0.0.1
+      MYSQL_TEST_PORT: "3306"
+      MYSQL_TEST_PASSWORD: ci-solo-para-pruebas
+    steps:
+      - uses: actions/checkout@v4
+      - name: Instalar bats
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends bats
+      - name: Descargar el cliente MySQL 8.4 (se ejecuta en contenedor, ver tests/shims)
+        run: docker pull mysql:8.4
+      - name: Esperar a que MySQL acepte conexiones
+        run: |
+          for _ in $(seq 1 30); do
+            docker run --rm --network host --entrypoint mysqladmin mysql:8.4 \
+              -h 127.0.0.1 -uroot -pci-solo-para-pruebas ping --silent && exit 0
+            sleep 2
+          done
+          echo "MySQL no respondió a tiempo" >&2
+          exit 1
+      - name: bats
+        run: bats --print-output-on-failure tests
