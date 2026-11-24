@@ -158,6 +158,21 @@ deploy/     cron, unidad y temporizador de systemd, plantilla del fichero de opc
 docs/       decisiones.md, restauracion-cronometrada.md
 ```
 
+## Qué se ha verificado y qué no
+
+**Ejecutado de verdad:**
+
+- `shellcheck scripts/*.sh lib/*.sh tests/shims/mysql`: sin avisos, en local y en el CI de GitHub.
+- `bats tests`: 35 de 35 pruebas contra un MySQL 8.4 real, en local (Docker Compose) y en GitHub Actions (servicio `mysql:8.4`). Último resultado del CI: [verde](https://github.com/dgr-devops/mysql-backup-restore/actions).
+- [Medición de restauración](docs/restauracion-cronometrada.md): 3 ejecuciones con 1 000 000 de pedidos; las tres restauraciones coincidieron con el origen.
+
+**No verificado:**
+
+- Los ejemplos de cron y systemd (`deploy/`) no se han instalado ni ejecutado; solo se comprobó su sintaxis.
+- Los scripts no se han probado con el cliente `mysql` nativo del sistema ni con MySQL 8.0 o 9.x: las pruebas usan el cliente oficial 8.4 en contenedor.
+- La recuperación a un instante con binlog no está implementada ni probada.
+- Los tiempos de restauración son de un portátil con NVMe; no se han medido otros tamaños ni otro hardware.
+
 ## Qué no cubre
 
 - Copia incremental, binlog y recuperación a un instante (ver [estrategia](#estrategia-de-copias)).
