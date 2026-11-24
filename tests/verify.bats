@@ -15,8 +15,8 @@ setup_file() {
 }
 
 teardown_file() {
-  drop_dbs_like "verify_bats_$$_"
-  drop_dbs_like "bats_$$_"
+  drop_dbs_like "verify_bats_$(run_tag)_"
+  drop_dbs_like "bats_$(run_tag)_"
 }
 
 # temp_dbs — bases temporales que haya dejado el verificador para este origen.

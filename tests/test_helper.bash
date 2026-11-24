@@ -57,12 +57,18 @@ require_mysql() {
   fi
 }
 
-# new_db_name — nombre único para una base de pruebas.
-new_db_name() {
-  printf 'bats_%s_%s' "$$" "$RANDOM"
+# run_tag — identificador común a toda la ejecución de bats (setup_file, tests y teardown_file
+# corren en procesos distintos, así que no sirve $$).
+run_tag() {
+  printf '%s' "$BATS_RUN_TMPDIR" | cksum | cut -d' ' -f1
 }
 
-# drop_dbs_like <prefijo> — borra las bases de prueba de este proceso.
+# new_db_name — nombre único para una base de pruebas de esta ejecución.
+new_db_name() {
+  printf 'bats_%s_%s' "$(run_tag)" "$RANDOM"
+}
+
+# drop_dbs_like <prefijo> — borra las bases de prueba con ese prefijo.
 drop_dbs_like() {
   local db
   for db in $(sql "SELECT SCHEMA_NAME FROM information_schema.SCHEMATA WHERE SCHEMA_NAME LIKE '${1}%'"); do

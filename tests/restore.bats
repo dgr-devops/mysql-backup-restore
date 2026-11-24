@@ -15,7 +15,7 @@ setup_file() {
 }
 
 teardown_file() {
-  drop_dbs_like "bats_$$_"
+  drop_dbs_like "bats_$(run_tag)_"
 }
 
 setup() {
