@@ -1,0 +1,13 @@
+# /etc/systemd/system/mysql-backup@.timer — programa mysql-backup@<base>.service cada día.
+[Unit]
+Description=Copia diaria de MySQL (%i)
+
+[Timer]
+OnCalendar=*-*-* 02:30:00
+# Si el equipo estaba apagado a la hora prevista, ejecuta la copia al arrancar.
+Persistent=true
+# Reparte el arranque para no coincidir con otras tareas de las 02:30.
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target

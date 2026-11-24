@@ -1,0 +1,16 @@
+# /etc/cron.d/mysql-backup — copia diaria de la base "tienda" y verificación semanal de la restauración.
+# Instalación: sudo install -m 644 deploy/mysql-backup.cron /etc/cron.d/mysql-backup
+# Ajusta las rutas: los scripts en /opt/mysql-backup-restore y las credenciales en un fichero 600
+# fuera del repositorio (ver deploy/backup.example.cnf). Las salidas van al syslog con etiqueta.
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+MYSQL_DEFAULTS_FILE=/etc/mysql-backup/backup.cnf
+BACKUP_DIR=/var/backups/mysql
+KEEP_COPIES=14
+KEEP_DAYS=30
+
+# Todos los días a las 02:30 (RPO de 24 h). flock interno: si una copia tarda, la siguiente se salta.
+30 2 * * *  backup  /opt/mysql-backup-restore/scripts/mysql-backup.sh -d tienda 2>&1 | logger -t mysql-backup
+
+# Los domingos a las 04:00, comprobar que la última copia se restaura y coincide con el origen.
+0 4 * * 0   backup  /opt/mysql-backup-restore/scripts/mysql-verify-restore.sh -f "$(ls -1t /var/backups/mysql/tienda_*.sql.gz | head -n1)" -s tienda 2>&1 | logger -t mysql-verify

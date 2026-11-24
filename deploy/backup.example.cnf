@@ -1,0 +1,13 @@
+# Ejemplo de fichero de opciones del cliente. Cópialo FUERA del repositorio, por ejemplo:
+#   install -m 600 -o root deploy/backup.example.cnf /etc/mysql-backup/backup.cnf
+# y edita la clave. Úsalo con:  mysql-backup.sh -c /etc/mysql-backup/backup.cnf -d tienda
+#
+# Usuario recomendado (solo lo necesario para copiar, no root):
+#   CREATE USER 'backup'@'localhost' IDENTIFIED BY '...';
+#   GRANT SELECT, SHOW VIEW, TRIGGER, EVENT, LOCK TABLES ON tienda.* TO 'backup'@'localhost';
+#   GRANT SHOW_ROUTINE ON *.* TO 'backup'@'localhost';   -- MySQL 8.0+: necesario para --routines
+[client]
+user=backup
+password=CAMBIA-ESTA-CLAVE
+host=127.0.0.1
+port=3306
