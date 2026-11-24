@@ -1,0 +1,22 @@
+# MySQL 8.4 (LTS) solo para pruebas y para la medición cronometrada. No es una configuración de producción.
+#   cp .env.example .env && docker compose up -d --wait
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: mysql-backup-restore-db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?define MYSQL_ROOT_PASSWORD en .env (copia .env.example)}
+    ports:
+      # Solo en loopback: la base de pruebas no debe verse desde la red.
+      - "127.0.0.1:${MYSQL_PORT:-33306}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 3s
+      timeout: 3s
+      retries: 40
+      start_period: 10s
+
+volumes:
+  mysql-data:

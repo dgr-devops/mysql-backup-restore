@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Shim de pruebas: ejecuta el cliente `mysql`/`mysqldump` oficial de MySQL 8.4 dentro de un contenedor,
+# conectando por la red del host. Así los tests no dependen del cliente instalado en la máquina
+# (en Arch/MariaDB el cliente del sistema es de otra familia).
+# Uso: PATH="$PWD/tests/shims:$PATH" bats tests
+set -euo pipefail
+
+tool="$(basename "$0")"
+image="${MYSQL_CLIENT_IMAGE:-mysql:8.4}"
+mounts=()
+for arg in "$@"; do
+  if [[ "$arg" == --defaults-extra-file=* ]]; then
+    dir="$(cd "$(dirname "${arg#--defaults-extra-file=}")" && pwd)"
+    mounts+=(-v "${dir}:${dir}:ro")
+  fi
+done
+
+exec docker run --rm -i --network host --entrypoint "$tool" \
+  -e MYSQL_PWD "${mounts[@]}" "$image" "$@"
