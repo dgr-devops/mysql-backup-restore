@@ -1,0 +1,14 @@
+# Credenciales y configuración local: nunca al repositorio
+.env
+*.cnf
+!deploy/*.example.cnf
+# Copias de seguridad y artefactos de pruebas
+backups/
+*.sql
+!sample/schema.sql
+*.sql.gz
+*.sha256
+tests/.tmp/
+*.log
+*.swp
+.vscode/

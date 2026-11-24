@@ -1,0 +1,3 @@
+# Resuelve los `source` relativos al directorio de cada script.
+source-path=SCRIPTDIR
+external-sources=true
